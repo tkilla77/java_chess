@@ -8,41 +8,39 @@ public class Pawn extends Piece {
 
     @Override
     public boolean isLegalMove(Cell start, Cell dest) {
-        // TODO Auto-generated method stub
+        // Impossible to decide statically without game information.
+        Direction dir = start.getDirection(dest);
+        int distance = start.getDistance(dest);
+        if (distance == 2) {
+            // consider double move from initial position
+            return color().isPawnStartRow(start) && color().isPawnMoveDirection(dir);
+        }
+        if (distance == 1) {
+            return color().isPawnMoveDirection(dir) || color().isPawnCaptureDirection(dir);
+        }
         return false;
     }
 
     @Override
     public boolean canMove(Game game, Cell start, Cell dest) {
-        int startRow;
-        Direction direction;
-        if (game.getTurn() == Color.WHITE) {
-            startRow = 2;
-            direction = Direction.UP;
-        } else {
-            startRow = 7;
-            direction = Direction.DOWN;
-        }
         Direction dir = start.getDirection(dest);
-        if (start.getRow() == startRow) {
+        int distance = start.getDistance(dest);
+        if (distance == 2) {
             // consider double move from initial position
-            if (dir == direction && start.getDistance(dest) == 2) {
-                return game.isCellFree(dest) && game.isPathFree(start, dest);
+            return color().isPawnStartRow(start)
+                    && color().isPawnMoveDirection(dir)
+                    && game.isCellFree(dest)
+                    && game.isPathFree(start, dest);
+        }
+        if (distance == 1) {
+            if (color().isPawnMoveDirection(dir)) {
+                return game.isCellFree(dest);
             }
+            // TODO implement en-passant.
+            if (color().isPawnCaptureDirection(dir)) {
+                return game.isCellOpponent(dest);
+            } 
         }
-        if (start.getDistance(dest) != 1) {
-            return false;
-        }
-        if (dir == direction) {
-            return game.isCellFree(dest);
-        }
-        // TODO implement en-passant.
-        if (game.getTurn() == Color.WHITE && (dir == Direction.UP_LEFT || dir == Direction.UP_RIGHT)) {
-            return game.isCellOpponent(dest);
-        } 
-        if (game.getTurn() == Color.BLACK && (dir == Direction.DOWN_LEFT || dir == Direction.DOWN_RIGHT)) {
-            return game.isCellOpponent(dest);
-        } 
         return false;
     }
     
