@@ -17,8 +17,8 @@ public class Pawn extends Piece {
         int startRow;
         Direction direction;
         if (game.getTurn() == Color.WHITE) {
-                startRow = 2;
-                direction = Direction.UP;
+            startRow = 2;
+            direction = Direction.UP;
         } else {
             startRow = 7;
             direction = Direction.DOWN;
@@ -30,12 +30,19 @@ public class Pawn extends Piece {
                 return game.isCellFree(dest) && game.isPathFree(start, dest);
             }
         }
-        if (dir == direction && start.getDistance(dest) == 1) {
+        if (start.getDistance(dest) != 1) {
+            return false;
+        }
+        if (dir == direction) {
             return game.isCellFree(dest);
         }
-        if (dir == Direction.UP_LEFT || dir == Direction.UP_RIGHT) {
+        // TODO implement en-passant.
+        if (game.getTurn() == Color.WHITE && (dir == Direction.UP_LEFT || dir == Direction.UP_RIGHT)) {
             return game.isCellOpponent(dest);
-        }
+        } 
+        if (game.getTurn() == Color.BLACK && (dir == Direction.DOWN_LEFT || dir == Direction.DOWN_RIGHT)) {
+            return game.isCellOpponent(dest);
+        } 
         return false;
     }
     
