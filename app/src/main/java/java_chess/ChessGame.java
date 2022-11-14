@@ -30,7 +30,7 @@ public class ChessGame implements Game {
     }
 
     private Piece piece(Cell cell) {
-        return board[cell.getColumnIndex() - 1][cell.getRow() - 1];
+        return board[cell.getColumnIndex() - 1][cell.row() - 1];
     }
 
     @Override

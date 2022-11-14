@@ -7,16 +7,20 @@ public enum Color {
             return "w";
         }
 
-        @Override public boolean isPawnMoveDirection(Direction dir) {
-            return dir == Direction.UP;
+        @Override public Direction getPawnMoveDirection() {
+            return Direction.UP;
         }
 
         @Override public boolean isPawnCaptureDirection(Direction dir) {
             return dir == Direction.UP_LEFT || dir ==  Direction.UP_RIGHT;
         }
 
-        @Override public boolean isPawnStartRow(Cell cell) {
-            return cell.getRow() == 2;
+        @Override public int getPawnStartRow() {
+            return 2;
+        }
+
+        @Override public int getPawnConversionRow() {
+            return 8;
         }
     },
     BLACK() {
@@ -24,22 +28,36 @@ public enum Color {
             return "b";
         }
 
-        @Override public boolean isPawnMoveDirection(Direction dir) {
-            return dir == Direction.DOWN;
+        @Override public Direction getPawnMoveDirection() {
+            return Direction.DOWN;
         }
 
         @Override public boolean isPawnCaptureDirection(Direction dir) {
             return dir == Direction.DOWN_LEFT || dir ==  Direction.DOWN_RIGHT;
         }
 
-        @Override public boolean isPawnStartRow(Cell cell) {
-            return cell.getRow() == 7;
+        @Override public int getPawnStartRow() {
+            return 7;
+        }
+
+        @Override public int getPawnConversionRow() {
+            return 1;
         }
     };
     
     @Override
     public abstract String toString();
-    public abstract boolean isPawnMoveDirection(Direction dir);
+    public boolean isPawnMoveDirection(Direction dir) {
+        return dir == getPawnMoveDirection();
+    };
     public abstract boolean isPawnCaptureDirection(Direction dir);
-    public abstract boolean isPawnStartRow(Cell cell);
+    public abstract int getPawnStartRow();
+    public boolean isPawnStartRow(Cell cell) {
+        return cell.row() == getPawnStartRow();
+    }
+    public abstract Direction getPawnMoveDirection();
+    public abstract int getPawnConversionRow();
+    public boolean isPawnConversionRow(Cell cell) {
+        return cell.row() == getPawnConversionRow();
+    }
 }

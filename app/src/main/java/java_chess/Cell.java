@@ -6,8 +6,22 @@ public final class Cell {
     private final int row;
     private final char column;
 
+    public static Cell at(char column, int row) {
+        return new Cell(column, row);
+    }
 
-    public Cell(char column, int row) {
+    public static Cell at(String address) {
+        if (address.length() != 2) {
+            throw new IllegalArgumentException("illegal address " + address);
+        }
+        try {
+            return new Cell(address.charAt(0), Integer.parseUnsignedInt(address, 1, 2, 10));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("illegal address " + address, e);
+        }
+    }
+
+    private Cell(char column, int row) {
         if (row < 1 || 8 < row) {
             throw new IllegalArgumentException("illegal row " + row);
         }
@@ -18,11 +32,11 @@ public final class Cell {
         this.row = row;
     }
 
-    public int getRow() {
+    public int row() {
         return row;
     }
 
-    public char getColumn() {
+    public char col() {
         return column;
     }
 
@@ -101,7 +115,18 @@ public final class Cell {
         return result.build();
     }
 
+    /** Returns a new cell in the given direction from this cell. Throws IllegalArgumenException if
+     * the cell in the given direction does not exist (i.e. is not on the board) or if direction is
+     * {@linkplain Direction.OTHER}. */
     public Cell move(Direction direction) {
+        return move(direction, 1);
+    }
+
+    /** Returns a new cell in the given direction from this cell. Throws IllegalArgumenException if
+     * the cell in the given direction does not exist (i.e. is not on the board) or if direction is
+     * {@linkplain Direction.OTHER}.
+     */
+    public Cell move(Direction direction, int steps) {
         int rowIncrement;
         int colIncrement;
         switch(direction) {
@@ -137,13 +162,14 @@ public final class Cell {
                 rowIncrement = 1;
                 colIncrement = 1;
                 break;
-            case ZERO:
             case OTHER:
+                throw new IllegalArgumentException("Cannot move in direction OTHER");
+            case ZERO:
             default:
                 return this;
         }
-        int row = this.row + rowIncrement;
-        int col = this.getColumnIndex() + colIncrement;
+        int row = this.row + rowIncrement * steps;
+        int col = this.getColumnIndex() + colIncrement * steps;
 
         return new Cell(colChar(col), row);
     }
@@ -152,5 +178,44 @@ public final class Cell {
         return "abcdefgh".charAt(col - 1);
     }
 
+    /** Returns true if moving in {@code value} is legal and would result is
+     * not the current cell. */
+    public boolean isLegalDirection(Direction direction) {
+        if (direction == Direction.ZERO) {
+            return false;
+        }
+        try {
+            move(direction);
+            return true;
+        } catch (IllegalArgumentException e) { 
+            return false;
+        }
+    }
+
+    /** Returns the list of all legal directions moveable from this cell. */
+    public Iterable<Direction> getLegalDirections() {
+        ImmutableList.Builder<Direction> result = ImmutableList.builder();
+        for (Direction direction : Direction.values()) {
+            if (isLegalDirection(direction)) {
+                result.add(direction);
+            }
+        }
+        return result.build();
+    }
+
+    /** Returns the list of all neighboring cells. */
+    public Iterable<Cell> getNeighbors() {
+        ImmutableList.Builder<Cell> result = ImmutableList.builder();
+        for (Direction direction : Direction.values()) {
+            try {
+                if (direction != Direction.ZERO && direction != Direction.OTHER) {
+                    result.add(move(direction));
+                }
+            } catch (IllegalArgumentException e) {
+                // swallow - moved off the board
+            }
+        }
+        return result.build();
+    }
 
 }
